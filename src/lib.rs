@@ -1,5 +1,5 @@
-mod prefecture;
-mod city;
+pub mod prefecture;
+pub mod city;
 pub use prefecture::Prefecture;
 
 #[cfg(test)]

@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 lazy_static="1.4"
+calamine="0.18.0"
+csv = "1.1"
+
