@@ -3,8 +3,9 @@ use std::collections::HashMap;
 
 #[derive(Default, Debug, Clone)]
 pub struct City {
-    pub prefecture_id: i32,
     pub id: i32,
+    pub prefecture_id: i32,
+    pub major_city_id: i32,
     pub name: String,
 }
 
@@ -38,10 +39,12 @@ fn load_cities() -> HashMap<i32, City> {
             let mut cols = line.split("\t");
             let prefecture_id = cols.next().unwrap().parse::<i32>().unwrap();
             let city_id = cols.next().unwrap().parse::<i32>().unwrap();
+            let major_city_id = cols.next().unwrap().parse::<i32>().unwrap();
             let city_name = cols.next().unwrap().to_string();
             City {
                 id: city_id,
                 prefecture_id,
+                major_city_id,
                 name: city_name,
             }
         })
@@ -58,7 +61,7 @@ mod tests {
     #[test]
     fn test_load_cities() {
         let cities = City::get_cities();
-        assert_eq!(cities.len(), 1896);
+        assert_eq!(cities.len(), 1922);
         let city = City::find_by_id(13101).unwrap();
         assert_eq!(city.prefecture_id, 13);
         assert_eq!(city.id, 13101);
@@ -67,5 +70,6 @@ mod tests {
         let city = City::find_by_name("堺市堺区").unwrap_or(City::default());
         assert_eq!(city.id, 27141);
         assert_eq!(city.name, "堺市堺区");
+        assert_eq!(city.major_city_id, 27140);
     }
 }

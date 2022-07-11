@@ -7,8 +7,10 @@ fn main() {
     let mut excel: Xlsx<_> = open_workbook("./storage/000730858.xlsx").unwrap();
     let mut cities = vec![];
     let mut ignore_city = vec![];
+    let mut add_id = vec![];
     if let Some(Ok(r)) = excel.worksheet_range("H30.10.1政令指定都市") {
         let mut is_header = true;
+        let mut major_city_id = 0;
         for row in r.rows() {
             if is_header {
                 is_header = false;
@@ -18,12 +20,16 @@ fn main() {
             if city.is_none() {
                 continue;
             }
-            let city = city.unwrap();
+            let mut city = city.unwrap();
             if city.name.ends_with("市") {
-                ignore_city.push(city.name);
-                continue;
+                major_city_id = city.id;
+                // ignore_city.push(city.name);
+                // continue;
             }
+            city.major_city_id = major_city_id;
+            add_id.push(city.id);
             cities.push(city);
+
         }
     }
     if let Some(Ok(r)) = excel.worksheet_range("R1.5.1現在の団体") {
@@ -41,6 +47,11 @@ fn main() {
             if ignore_city.contains(&city.name){
                 continue;
             }
+            if add_id.contains(&city.id){
+                continue;
+
+            }
+            add_id.push(city.id);
             cities.push(city);
         }
     }
@@ -53,8 +64,8 @@ fn main() {
     // let mut wtr = ;
     cities.sort_by(|a, b| a.id.cmp(&b.id));
     for city in cities {
-        println!("{} {} {}", city.prefecture_id, city.id, city.name);
-        wtr.write_record(&[city.prefecture_id.to_string(), city.id.to_string(), city.name]).expect("error write csv");
+        println!("{} {} {} {}", city.prefecture_id, city.id, city.major_city_id,city.name);
+        wtr.write_record(&[city.prefecture_id.to_string(), city.id.to_string(), city.major_city_id.to_string(), city.name]).expect("error write csv");
     }
     wtr.flush().expect("flush");
 }
@@ -76,7 +87,8 @@ fn row_to_city(row: &[DataType]) -> Option<City> {
 
     Some(City {
         id: city_id,
-        prefecture_id: prefecture_id,
+        prefecture_id,
+        major_city_id:0,
         name: city_name,
     })
 }
