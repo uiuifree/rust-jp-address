@@ -1,7 +1,7 @@
 extern crate core;
 
-use calamine::{Reader, Xlsx, open_workbook, DataType};
-use csv::{ WriterBuilder};
+use calamine::{open_workbook, DataType, Reader, Xlsx};
+use csv::WriterBuilder;
 use jp_address_search::city::City;
 fn main() {
     let mut excel: Xlsx<_> = open_workbook("./storage/000730858.xlsx").unwrap();
@@ -29,7 +29,6 @@ fn main() {
             city.major_city_id = major_city_id;
             add_id.push(city.id);
             cities.push(city);
-
         }
     }
     if let Some(Ok(r)) = excel.worksheet_range("R1.5.1現在の団体") {
@@ -44,19 +43,18 @@ fn main() {
                 continue;
             }
             let city = city.unwrap();
-            if ignore_city.contains(&city.name){
+            if ignore_city.contains(&city.name) {
                 continue;
             }
-            if add_id.contains(&city.id){
+            if add_id.contains(&city.id) {
                 continue;
-
             }
             add_id.push(city.id);
             cities.push(city);
         }
     }
     // println!("{:?}",vec);
-    let mut wtr  =WriterBuilder::new()
+    let mut wtr = WriterBuilder::new()
         .delimiter(b'\t')
         .from_path("src/data/cities.tsv")
         .expect("error write csv");
@@ -64,8 +62,17 @@ fn main() {
     // let mut wtr = ;
     cities.sort_by(|a, b| a.id.cmp(&b.id));
     for city in cities {
-        println!("{} {} {} {}", city.prefecture_id, city.id, city.major_city_id,city.name);
-        wtr.write_record(&[city.prefecture_id.to_string(), city.id.to_string(), city.major_city_id.to_string(), city.name]).expect("error write csv");
+        println!(
+            "{} {} {} {}",
+            city.prefecture_id, city.id, city.major_city_id, city.name
+        );
+        wtr.write_record(&[
+            city.prefecture_id.to_string(),
+            city.id.to_string(),
+            city.major_city_id.to_string(),
+            city.name,
+        ])
+        .expect("error write csv");
     }
     wtr.flush().expect("flush");
 }
@@ -88,10 +95,7 @@ fn row_to_city(row: &[DataType]) -> Option<City> {
     Some(City {
         id: city_id,
         prefecture_id,
-        major_city_id:0,
+        major_city_id: 0,
         name: city_name,
     })
 }
-
-
-

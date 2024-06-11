@@ -1,11 +1,11 @@
-use std::collections::{HashMap, VecDeque};
-use std::process::exit;
-use calamine::{Xlsx, open_workbook, DataType};
 use csv::{ReaderBuilder, WriterBuilder};
-use jp_address_search::city::City;
+use std::collections::{HashMap, VecDeque};
 
 fn main() {
-    let mut reader = ReaderBuilder::new().has_headers(false).from_path("./storage/KEN_ALL.CSV_UTF.csv").expect("not open");
+    let mut reader = ReaderBuilder::new()
+        .has_headers(false)
+        .from_path("./storage/KEN_ALL_UTF8.csv")
+        .expect("not open");
     let mut hash = HashMap::new();
     let mut address_list = VecDeque::new();
     let mut pairs: Vec<String> = vec![];
@@ -38,25 +38,28 @@ fn main() {
         //     ("８", "8"),
         //     ("９", "9"),
         // ]);
-        street_address = street_address.chars().map(|q| {
-            let numbers = HashMap::from([
-                ("０", "0"),
-                ("１", "1"),
-                ("２", "2"),
-                ("３", "3"),
-                ("４", "4"),
-                ("５", "5"),
-                ("６", "6"),
-                ("７", "7"),
-                ("８", "8"),
-                ("９", "9"),
-            ]);
-            let mut q = q.to_string();
-            for (k, v) in numbers {
-                q = q.replace(k, v);
-            }
-            return q;
-        }).collect::<String>();
+        street_address = street_address
+            .chars()
+            .map(|q| {
+                let numbers = HashMap::from([
+                    ("０", "0"),
+                    ("１", "1"),
+                    ("２", "2"),
+                    ("３", "3"),
+                    ("４", "4"),
+                    ("５", "5"),
+                    ("６", "6"),
+                    ("７", "7"),
+                    ("８", "8"),
+                    ("９", "9"),
+                ]);
+                let mut q = q.to_string();
+                for (k, v) in numbers {
+                    q = q.replace(k, v);
+                }
+                return q;
+            })
+            .collect::<String>();
 
         if street_address == "以下に掲載がない場合" {
             street_address = "".to_string();
@@ -67,7 +70,6 @@ fn main() {
 
         let value = street_address.to_string();
         let mut street_value = value.split('（');
-
 
         let street_value_base = street_value.next();
         let street_value_append = street_value.next();
@@ -99,7 +101,6 @@ fn main() {
         if street_address.contains("、") {
             street_address = "".to_string();
         }
-
 
         let key = zip.to_string() + prefecture_name + city_name + street_address.as_str();
         if pairs.contains(&key) {
@@ -142,7 +143,8 @@ fn main() {
         "prefecture_name",
         "city_name",
         "street_address",
-    ]).expect("error write csv");
+    ])
+    .expect("error write csv");
     for address in address_list {
         // println!("{} {} {} {}", city.prefecture_id, city.id, city.major_city_id,city.name);
         wtr.write_record(&[
@@ -152,7 +154,8 @@ fn main() {
             address.prefecture_name,
             address.city_name,
             address.street_address,
-        ]).expect("error write csv");
+        ])
+        .expect("error write csv");
     }
     wtr.flush().expect("flush");
 }
@@ -166,6 +169,3 @@ struct ZipAddress {
     city_name: String,
     street_address: String,
 }
-
-
-
